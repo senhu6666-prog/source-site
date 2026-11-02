@@ -54,6 +54,17 @@ footer a{color:#667085}
 .compare th,.compare td{border:1px solid var(--line);padding:10px 12px;text-align:left;font-size:15px;vertical-align:top}
 .compare th{background:var(--surface-soft)}
 @media(max-width:600px){.formula-grid{grid-template-columns:1fr}}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.btn{display:inline-block;background:#fff;color:#17202b;border:1px solid #e6e2d8;border-radius:999px;padding:7px 14px;font-size:14px;font-weight:700}
+.btn:hover{text-decoration:none;border-color:#17202b}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.jump-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:12px}
+.jump-card{display:block;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;color:var(--ink)}
+.jump-card:hover{text-decoration:none;border-color:#d6c9a8;transform:translateY(-1px)}
+.jump-card b{display:block;font-size:16px}
+.jump-card span{color:var(--muted);font-size:14px}
+h2[id],.day{scroll-margin-top:110px}
+@media(max-width:600px){.jump-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -61,6 +72,21 @@ footer a{color:#667085}
 <div class="tabs"><a href="index.html">← 回到首页</a><a href="#profiles">两位身形</a><a href="#formulas">穿搭公式</a><a href="#business">商务风</a><a href="#daily">日常风</a><a href="#shops">购买入口</a></div></div>
 <main>
 <section class="hero"><div class="kicker">PERSONAL STYLE · 商务 × 日常</div><h1>合体、不浮夸，能直接买</h1><p>只选常规版型，不选 oversize、不选夸张印花和廓形。颜色以藏青、深灰、黑、白、浅蓝、卡其等中性色为主，商务和日常可以互相搭。</p><div class="stats"><span>两位身形定制</span><span>商务风 5 组</span><span>日常风 4 组</span><span>国内官方购买入口</span></div></section>
+
+<h2 class="section-title" id="jump">一键直达 · 每个卡片点开就是对应页面</h2>
+<p class="section-sub">购物卡点开是官方店铺或示例商品页，灵感卡点开是参考图文页；小红书站内笔记因平台限制无法直接给出单篇 ID，这里给的是小红书时尚频道入口，进去后用上面关键词检索即可看到原笔记。</p>
+<div class="jump-grid">
+<a class="jump-card" href="https://item.m.jd.com/product/65265334954.html?ad_od=3"><b>商务衬衫直达 ↗</b><span>雅戈尔京东示例商品：条纹 DP 免烫衬衫，价格库存以商品页实时为准</span></a>
+<a class="jump-card" href="https://mall.jd.com/index-15515037.html"><b>西裤 / 休闲裤直达 ↗</b><span>海澜之家京东旗舰店，站内搜直筒西裤</span></a>
+<a class="jump-card" href="https://mall.jd.com/index-1000148425.html"><b>单西直达 ↗</b><span>雅戈尔京东自营旗舰店，站内搜单西 / 商务西服</span></a>
+<a class="jump-card" href="http://www.uniqlo.cn/"><b>日常 T 恤直达 ↗</b><span>优衣库中国官网，站内搜纯色 T 恤 / Polo</span></a>
+<a class="jump-card" href="https://www.muji.com.cn/cn/store/"><b>针织 / 日常直达 ↗</b><span>无印良品官方网络商城，站内搜针织衫 / 开衫</span></a>
+<a class="jump-card" href="https://www.xiaohongshu.com/explore?channel_id=homefeed.fashion_v3"><b>小红书时尚频道直达 ↗</b><span>进去后搜：上短下长 / 瘦高 上松下直 / 商务合体，即可看到原笔记</span></a>
+<a class="jump-card" href="https://girlstyle.com/my/article/213478/%E5%B0%8F%E4%B8%AA%E5%AD%90-%E8%85%BF%E7%9F%AD-%E5%A5%B3%E7%94%9F-%E7%A9%BF%E6%90%AD-%E6%90%AD%E9%85%8D-%E5%85%AC%E5%BC%8F-%E6%98%BE%E9%AB%98%E6%98%BE%E7%98%A6"><b>参考图文：上短下长 ↗</b><span>小个子 5 个显高公式，含上短下长详解</span></a>
+<a class="jump-card" href="https://girlstyle.com/my/article/187730/%E5%B0%8F%E4%B8%AA%E5%AD%90-%E7%A9%BF%E6%90%AD%E6%B3%95%E5%88%99-%E6%98%BE%E9%AB%98-%E6%97%B6%E5%B0%9A-%E6%90%AD%E9%85%8D"><b>参考图文：小个子显高法则 ↗</b><span>上长下短、同色系、包款大小等法则</span></a>
+<a class="jump-card" href="https://girlstyle.com/my/article/232327/%E8%81%8C%E5%9C%BA-%E9%80%9A%E5%8B%A4-%E7%A9%BF%E6%90%AD-%E4%B8%8A%E7%8F%AD%E6%97%8F"><b>参考图文：通勤穿搭公式 ↗</b><span>衬衫 + 吸烟裤、西装 + 半裙等 6 组公式</span></a>
+<a class="jump-card" href="https://post.smzdm.com/p/apqmmnqx/"><b>参考图文：上松下直避雷 ↗</b><span>换季清单交叉对比：oversize 换成上松下直等 3 条</span></a>
+</div>
 
 <h2 class="section-title" id="profiles">两位身形 · 先看这个再选码</h2>
 <p class="section-sub">身高体重只是选码起点，下单前务必量胸围、腰围、肩宽和裤长，再对照该品牌尺码表。</p>
@@ -79,7 +105,7 @@ footer a{color:#667085}
 <p><span class="chip">关键词：瘦高 上松下直</span><span class="chip">关键词：小个子 上短下长</span><span class="chip">关键词：商务 合体 肩线</span><span class="chip">关键词：日常 优衣库 基础款</span><span class="chip">关键词：常规版 直筒裤</span></p>
 <table class="compare"><tr><th>要做</th><th>不要做</th></tr><tr><td>肩线对位、衣长到腰带附近、裤脚不堆叠</td><td>oversize 上衣 + 长裤一起穿，容易五五分、压身高</td></tr><tr><td>全身 2–3 色，低饱和、同色系优先</td><td>大印花、大 Logo、多种亮色混搭</td></tr><tr><td>挺括、垂坠面料；硬朗短款外套</td><td>软塌面料、落肩过狠、长款拖地外套</td></tr><tr><td>先量肩胸腰裤长，再对照尺码表</td><td>只按身高体重标号下单，不看尺码表</td></tr></table>
 <p><strong>购买渠道提炼：</strong>小红书图文里高频出现的购买路径是优衣库官网 / App / 小程序、天猫官方旗舰店、京东官方旗舰店，以及品牌官方商城；找款时建议搜“常规版 + 单品名 + 身高体重”，再看试穿图里的肩线、衣长、裤脚三个点，不要只看滤镜图。价格、货号和库存以官方实时页面为准，本页不写死价格。</p>
-<p class="warn"><strong>图片说明：</strong>本页没有搬运小红书博主的照片，色块、比例条和公式卡都是本页自制的示意；想看真人试穿效果，请在小红书站内用上面 4 组关键词自己检索，那里的图片归原作者所有。</p>
+<p class="warn"><strong>关于搬运的说明：</strong>本页不搬运小红书博主的照片和全文，照片与原文归原作者所有；上面“一键直达”里的灵感卡点开就是参考图文页，小红书入口点开是时尚频道，进去用关键词检索即可看到原笔记。这样既能直达，又不会把别人的图和文变成本站内容。</p>
 
 <h2 class="section-title" id="business">商务风 · 上班、见客户、正式场合</h2>
 <p class="section-sub">核心是衬衫、西裤、单西三件套搭好，颜色越少越稳。</p>
