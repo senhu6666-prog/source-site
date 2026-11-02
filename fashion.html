@@ -94,6 +94,15 @@ h2[id]{scroll-margin-top:110px}
   .wish-card:hover{transform:none}
   .wish-reveal{opacity:1;transform:none}
 }
+.compare-wrap{overflow-x:auto;margin-bottom:12px}
+.compare-table{width:100%;min-width:560px;border-collapse:collapse;background:var(--surface);border-radius:16px;overflow:hidden;font-size:14px}
+.compare-table th,.compare-table td{border:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top;white-space:nowrap}
+.compare-table th{background:var(--surface-soft)}
+.compare-table td.low{background:#fdf0e8;font-weight:800;color:var(--accent)}
+.compare-table a{white-space:nowrap}
+.price-form{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.price-form select,.price-form input{border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-size:14px;background:var(--surface);color:var(--ink);font:inherit}
+.price-form input{width:110px}
 </style>
 </head>
 <body>
@@ -169,6 +178,20 @@ h2[id]{scroll-margin-top:110px}
   <button type="button" data-who="共用">共用</button>
 </div>
 <div class="wish-grid" id="wishGrid"></div>
+<div class="wish-filters" id="viewToggle">
+  <button type="button" data-view="grid" class="active">卡片视图</button>
+  <button type="button" data-view="table">对比表视图</button>
+</div>
+<div class="compare-wrap" id="compareWrap" style="display:none"><table class="compare-table" id="compareTable"></table></div>
+<div class="price-form" id="priceForm">
+  <span style="font-size:14px">在平台搜到价格后，记一笔就能对比：</span>
+  <select id="priceItem"></select>
+  <select id="pricePlatform"><option>淘宝</option><option>京东</option><option>拼多多</option></select>
+  <input id="priceValue" type="number" min="1" placeholder="价格（元）">
+  <button class="wish-submit" id="savePrice" type="button">保存价格</button>
+  <button class="inspo-del" id="clearPrices" type="button">清除本地价格</button>
+  <span class="muted" id="priceStatus" style="font-size:13px">价格只存在本机浏览器，不提交到仓库。</span>
+</div>
 
 <h2 class="section-title" id="inspiration">灵感收藏</h2>
 <p class="section-sub">只保存链接和你写的短评，不保存、不展示原图和原文。</p>
@@ -190,8 +213,18 @@ const PLAT = [
   { name: "小红书", url: "https://www.xiaohongshu.com/search_result?keyword=" },
   { name: "抖音", url: "https://www.douyin.com/search/" }
 ];
+const PRICE_KEY = "xinyuan-prices";
+function readPrices() {
+  try { return JSON.parse(localStorage.getItem(PRICE_KEY)) || {}; } catch (e) { return {}; }
+}
+function writePrices(data) {
+  try { localStorage.setItem(PRICE_KEY, JSON.stringify(data)); } catch (e) {}
+}
 const API = {
-  getPrices: function (item) { return item.prices || null; }
+  getPrices: function (item) {
+    var local = readPrices()[item.name] || {};
+    return Object.assign({}, item.prices || {}, local);
+  }
 };
 const ITEMS = [
   { name: "免烫长袖衬衫", cat: "衬衫", who: "A", ref: "¥199–219", note: "常规版、肩线合肩，免烫好打理。", prices: { "淘宝": 199, "京东": 219 } },
@@ -233,7 +266,7 @@ function renderWish(filter) {
     var prices = API.getPrices(it);
     var low = lowestPrice(prices);
     var priceHtml = "";
-    if (prices) {
+    if (prices && Object.keys(prices).length) {
       var rows = Object.keys(prices).map(function (k) {
         var isLow = low && k === low.platform && Number(prices[k]) === low.price;
         return "<span" + (isLow ? ' class="low"' : "") + ">" + esc(k) + " ¥" + esc(prices[k]) + (isLow ? "（最低价）" : "") + "</span>";
@@ -247,6 +280,7 @@ function renderWish(filter) {
       "<h3>" + esc(it.name) + "</h3>" +
       "<p>" + esc(it.cat) + " · " + esc(WHO_LABEL[it.who] || it.who) + "</p>" +
       "<p>参考价：" + esc(it.ref) + "</p>" + priceHtml +
+      "<p class=\"muted\">搜：" + esc(it.name) + "</p>" +
       "<p>" + esc(it.note) + "</p>" +
       '<div class="wish-btns">' + btns + "</div></article>";
   }).join("");
@@ -258,6 +292,62 @@ document.querySelectorAll("#wishFilters button").forEach(function (btn) {
   });
 });
 renderWish("全部");
+function renderCompare() {
+  var table = document.getElementById("compareTable");
+  var pricePlats = ["淘宝", "京东", "拼多多"];
+  var head = "<tr><th>商品</th><th>适合谁</th><th>参考价</th>" +
+    pricePlats.map(function (p) { return "<th>" + esc(p) + "</th>"; }).join("") +
+    "<th>小红书 / 抖音</th></tr>";
+  var rows = ITEMS.map(function (it) {
+    var prices = API.getPrices(it);
+    var low = lowestPrice(prices);
+    var cells = pricePlats.map(function (p) {
+      var v = prices[p];
+      var isLow = low && p === low.platform && Number(v) === low.price;
+      var label = v ? "¥" + esc(v) + (isLow ? " ★最低" : "") : "去搜 ↗";
+      return '<td class="' + (isLow ? "low" : "") + '"><a href="' +
+        PLAT.filter(function (x) { return x.name === p; })[0].url + encodeURIComponent(it.name) +
+        '" target="_blank" rel="noopener noreferrer">' + label + "</a></td>";
+    }).join("");
+    var other = PLAT.filter(function (x) { return x.name === "小红书" || x.name === "抖音"; }).map(function (x) {
+      return '<a href="' + x.url + encodeURIComponent(it.name) + '" target="_blank" rel="noopener noreferrer">' + esc(x.name) + " ↗</a>";
+    }).join(" · ");
+    return "<tr><td>" + esc(it.name) + "</td><td>" + esc(WHO_LABEL[it.who] || it.who) + "</td><td>" + esc(it.ref) + "</td>" + cells + "<td>" + other + "</td></tr>";
+  }).join("");
+  table.innerHTML = head + rows;
+}
+renderCompare();
+document.querySelectorAll("#viewToggle button").forEach(function (btn) {
+  btn.addEventListener("click", function () {
+    document.querySelectorAll("#viewToggle button").forEach(function (b) { b.classList.toggle("active", b === btn); });
+    var isTable = btn.getAttribute("data-view") === "table";
+    document.getElementById("wishGrid").style.display = isTable ? "none" : "";
+    document.getElementById("compareWrap").style.display = isTable ? "" : "none";
+    if (isTable) renderCompare();
+  });
+});
+document.getElementById("priceItem").innerHTML = ITEMS.map(function (it) {
+  return '<option value="' + esc(it.name) + '">' + esc(it.name) + "</option>";
+}).join("");
+document.getElementById("savePrice").addEventListener("click", function () {
+  var name = document.getElementById("priceItem").value;
+  var plat = document.getElementById("pricePlatform").value;
+  var val = Number(document.getElementById("priceValue").value);
+  if (!name || !Number.isFinite(val) || val <= 0) { document.getElementById("priceStatus").textContent = "请选商品、平台并填一个大于 0 的价格。"; return; }
+  var all = readPrices();
+  all[name] = all[name] || {};
+  all[name][plat] = val;
+  writePrices(all);
+  document.getElementById("priceStatus").textContent = "已保存到本地：" + name + " · " + plat + " ¥" + val + "，卡片和对比表已更新。";
+  renderWish(document.querySelector("#wishFilters button.active").getAttribute("data-who"));
+  renderCompare();
+});
+document.getElementById("clearPrices").addEventListener("click", function () {
+  try { localStorage.removeItem(PRICE_KEY); } catch (e) {}
+  document.getElementById("priceStatus").textContent = "本地价格已清除。";
+  renderWish(document.querySelector("#wishFilters button.active").getAttribute("data-who"));
+  renderCompare();
+});
 (function () {
   var sec = document.getElementById("wishlist");
   if (!sec || !("IntersectionObserver" in window)) return;
