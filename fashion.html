@@ -103,6 +103,9 @@ h2[id]{scroll-margin-top:110px}
 .price-form{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .price-form select,.price-form input{border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-size:14px;background:var(--surface);color:var(--ink);font:inherit}
 .price-form input{width:110px}
+.sync-bar{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-bottom:12px;font-size:14px}
+.sync-bar p{margin:0 0 6px;color:#3f4756}
+.sync-bar .sync-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 </style>
 </head>
 <body>
@@ -171,6 +174,15 @@ h2[id]{scroll-margin-top:110px}
 
 <h2 class="section-title" id="wishlist">心愿单</h2>
 <p class="section-sub">按适合谁筛选，点平台按钮跳到该平台搜索页。</p>
+<div class="sync-bar" id="syncBar">
+  <p><strong>公开链接（任何人不用登录都能打开）：</strong><a href="https://senhu6666-prog.github.io/source-site/fashion.html">senhu6666-prog.github.io/source-site/fashion.html</a></p>
+  <p id="syncShared">共享数据：正在加载仓库版本……</p>
+  <p id="syncLocal">本地数据：仅本机浏览器可见。</p>
+  <div class="sync-row">
+    <button class="wish-submit" id="exportShared" type="button">导出共享数据 JSON</button>
+    <span class="muted" style="font-size:13px">想让所有人看到本地记的价格和灵感：导出这个文件，上传到仓库 data/fashion-shared.json 并提交，1–3 分钟后所有人打开都是新版；或者直接跟我说“同步”，我来推。</span>
+  </div>
+</div>
 <div class="wish-filters" id="wishFilters">
   <button type="button" data-who="全部" class="active">全部</button>
   <button type="button" data-who="A">A（180cm 男生）</button>
@@ -220,10 +232,37 @@ function readPrices() {
 function writePrices(data) {
   try { localStorage.setItem(PRICE_KEY, JSON.stringify(data)); } catch (e) {}
 }
+/* 共享数据层：仓库里的 data/fashion-shared.json，所有人打开看到同一份。
+   页面本身是纯静态网页，不能直接写仓库（写仓库要密钥，放在网页里等于公开密钥），
+   所以共享同步走“提交文件”这一步：导出 JSON → 提交到仓库 → Pages 1–3 分钟后所有人可见。
+   本地数据（localStorage）只影响本机，是先预览、后决定是否共享。 */
+var SHARED = { prices: {}, inspiration: [] };
+function updateSyncLocal() {
+  var el = document.getElementById("syncLocal");
+  if (!el) return;
+  var priceCount = 0;
+  Object.keys(readPrices()).forEach(function (k) { priceCount += Object.keys(readPrices()[k] || {}).length; });
+  el.textContent = "本地数据：仅本机浏览器可见（已记价格 " + priceCount + " 条，本地灵感 " + readInspo().length + " 条），别人打开看不到这些，除非导出并提交为共享数据。";
+}
+function loadShared() {
+  return fetch("data/fashion-shared.json").then(function (res) {
+    if (!res.ok) throw new Error("no shared file");
+    return res.json();
+  }).then(function (data) {
+    SHARED = { prices: data.prices || {}, inspiration: data.inspiration || [] };
+    document.getElementById("syncShared").textContent = "共享数据：已加载仓库版本，所有人打开看到同一份价格和共享灵感。";
+    renderWish(document.querySelector("#wishFilters button.active").getAttribute("data-who"));
+    renderCompare();
+    renderInspo();
+  }).catch(function () {
+    document.getElementById("syncShared").textContent = "共享数据：未找到仓库文件，当前显示页面内置数据；提交 data/fashion-shared.json 后，所有人打开都会加载它。";
+  });
+}
 const API = {
   getPrices: function (item) {
     var local = readPrices()[item.name] || {};
-    return Object.assign({}, item.prices || {}, local);
+    var shared = SHARED.prices[item.name] || {};
+    return Object.assign({}, item.prices || {}, shared, local);
   }
 };
 const ITEMS = [
@@ -284,6 +323,7 @@ function renderWish(filter) {
       "<p>" + esc(it.note) + "</p>" +
       '<div class="wish-btns">' + btns + "</div></article>";
   }).join("");
+  updateSyncLocal();
 }
 document.querySelectorAll("#wishFilters button").forEach(function (btn) {
   btn.addEventListener("click", function () {
@@ -378,13 +418,19 @@ function renderInspo() {
   var presetHtml = PRESET_INSPO.map(function (it) {
     return '<div class="inspo-card"><p><a href="' + esc(it.url) + '" target="_blank" rel="noopener noreferrer">' + esc(it.label) + " ↗</a></p></div>";
   }).join("");
+  var sharedHtml = (SHARED.inspiration || []).map(function (it) {
+    var tags = (it.tags || []).map(function (t) { return '<span class="chip">' + esc(t) + "</span>"; }).join(" ");
+    return '<div class="inspo-card"><p><span class="chip">共享</span><a href="' + esc(it.url) + '" target="_blank" rel="noopener noreferrer">打开原帖 ↗</a></p>' +
+      "<p>" + tags + "</p><p>" + esc(it.note) + "</p></div>";
+  }).join("");
   var userHtml = user.map(function (it, i) {
     var tags = (it.tags || []).map(function (t) { return '<span class="chip">' + esc(t) + "</span>"; }).join(" ");
     return '<div class="inspo-card"><p><a href="' + esc(it.url) + '" target="_blank" rel="noopener noreferrer">打开原帖 ↗</a></p>' +
       "<p>" + tags + "</p><p>" + esc(it.note) + "</p>" +
       '<button class="inspo-del" type="button" data-del="' + i + '">删除</button></div>';
   }).join("");
-  box.innerHTML = presetHtml + userHtml;
+  box.innerHTML = presetHtml + sharedHtml + userHtml;
+  updateSyncLocal();
 }
 document.getElementById("inspoList").addEventListener("click", function (e) {
   var btn = e.target.closest("[data-del]");
@@ -406,6 +452,19 @@ document.getElementById("inspoForm").addEventListener("submit", function (e) {
   renderInspo();
 });
 renderInspo();
+document.getElementById("exportShared").addEventListener("click", function () {
+  var merged = {};
+  Object.keys(SHARED.prices || {}).forEach(function (k) { merged[k] = SHARED.prices[k]; });
+  Object.keys(readPrices()).forEach(function (k) { merged[k] = Object.assign({}, merged[k] || {}, readPrices()[k]); });
+  var data = { prices: merged, inspiration: readInspo() };
+  var blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "fashion-shared.json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+loadShared();
 </script>
 </body>
 </html>
