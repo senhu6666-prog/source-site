@@ -65,11 +65,40 @@ footer a{color:#667085}
 .jump-card span{color:var(--muted);font-size:14px}
 h2[id],.day{scroll-margin-top:110px}
 @media(max-width:600px){.jump-grid{grid-template-columns:1fr}}
+<style>
+h2[id]{scroll-margin-top:110px}
+.wish-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.wish-filters button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:5px 13px;font-size:14px;cursor:pointer;font:inherit}
+.wish-filters button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.wish-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:12px}
+@media(min-width:640px){.wish-grid{grid-template-columns:repeat(4,1fr)}}
+.wish-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:0 2px 10px rgba(30,40,70,.04);transition:transform .2s,box-shadow .2s}
+.wish-card:hover{transform:translateY(-4px);box-shadow:0 8px 20px rgba(30,40,70,.10)}
+.wish-thumb{height:84px;border-radius:12px;margin-bottom:10px}
+.wish-card h3{margin:0 0 6px;font-size:16px;line-height:1.5}
+.wish-card p{margin:0 0 6px;color:#3f4756;font-size:14px}
+.wish-price{color:var(--muted)}
+.wish-price .low{color:var(--accent);font-weight:800}
+.wish-btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.wish-btns a{border:1px solid var(--line);background:var(--surface-soft);color:#374151;border-radius:999px;padding:4px 10px;font-size:13px;transition:border-color .2s,color .2s}
+.wish-btns a:hover{border-color:var(--accent);color:var(--accent);text-decoration:none}
+.wish-reveal{opacity:0;transform:translateY(10px);transition:opacity .5s,transform .5s}
+.wish-reveal.in{opacity:1;transform:none}
+.inspo-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
+.inspo-card p{margin:0 0 6px;color:#3f4756;font-size:15px}
+.wish-form input,.wish-form textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:15px;background:var(--surface);color:var(--ink);margin-bottom:10px;font:inherit}
+.wish-submit{background:var(--accent);color:#fff;border:0;border-radius:999px;padding:9px 18px;font-size:15px;cursor:pointer}
+.inspo-del{border:1px solid var(--line);background:var(--surface-soft);color:#374151;border-radius:999px;padding:4px 12px;font-size:13px;cursor:pointer}
+@media(prefers-reduced-motion:reduce){
+  .wish-card,.wish-reveal,.wish-btns a{transition:none}
+  .wish-card:hover{transform:none}
+  .wish-reveal{opacity:1;transform:none}
+}
 </style>
 </head>
 <body>
 <div class="top" id="top"><div class="top-in"><div class="brandmark">星</div><div class="logo">星源网</div><p>个人时尚 · 商务风 × 日常风</p></div>
-<div class="tabs"><a href="index.html">← 回到首页</a><a href="#profiles">两位身形</a><a href="#formulas">穿搭公式</a><a href="#business">商务风</a><a href="#daily">日常风</a><a href="#shops">购买入口</a></div></div>
+<div class="tabs"><a href="index.html">← 回到首页</a><a href="#profiles">两位身形</a><a href="#formulas">穿搭公式</a><a href="#business">商务风</a><a href="#daily">日常风</a><a href="#shops">购买入口</a><a href="#wishlist">心愿单</a></div></div>
 <main>
 <section class="hero"><div class="kicker">PERSONAL STYLE · 商务 × 日常</div><h1>合体、不浮夸，能直接买</h1><p>只选常规版型，不选 oversize、不选夸张印花和廓形。颜色以藏青、深灰、黑、白、浅蓝、卡其等中性色为主，商务和日常可以互相搭。</p><div class="stats"><span>两位身形定制</span><span>商务风 5 组</span><span>日常风 4 组</span><span>国内官方购买入口</span></div></section>
 
@@ -131,7 +160,162 @@ h2[id],.day{scroll-margin-top:110px}
 <p><strong>下单前自查：</strong>版型是不是常规版（避开 oversize、宽松、落肩、廓形这些词）→ 胸围腰围肩宽裤长有没有量 → 尺码表有没有对照 → 颜色是不是中性色 → 退换货规则有没有看。</p>
 <p><strong>说明：</strong>本页按你给的两组身高体重做选款起点，不构成医疗或体型诊断；价格、库存、尺码以各店铺实时页面为准。</p>
 
+<h2 class="section-title" id="wishlist">心愿单</h2>
+<p class="section-sub">按适合谁筛选，点平台按钮跳到该平台搜索页。</p>
+<div class="wish-filters" id="wishFilters">
+  <button type="button" data-who="全部" class="active">全部</button>
+  <button type="button" data-who="A">A（180cm 男生）</button>
+  <button type="button" data-who="B">B（157cm 女生）</button>
+  <button type="button" data-who="共用">共用</button>
+</div>
+<div class="wish-grid" id="wishGrid"></div>
+
+<h2 class="section-title" id="inspiration">灵感收藏</h2>
+<p class="section-sub">只保存链接和你写的短评，不保存、不展示原图和原文。</p>
+<div id="inspoList"></div>
+<form class="wish-form" id="inspoForm">
+  <input id="inspoUrl" type="url" placeholder="链接（须以 http:// 或 https:// 开头）" required>
+  <input id="inspoTags" placeholder="标签，逗号分隔（可选）">
+  <textarea id="inspoNote" rows="2" placeholder="一句话短评"></textarea>
+  <button class="wish-submit" type="submit">保存链接</button>
+</form>
+
 </main>
 <footer>星源网 · 个人时尚板块；所有外部链接归原品牌与原平台所有。<p><a href="index.html">← 回到首页</a> · <a href="#top">回到顶部 ↑</a></p></footer>
+<script>
+const PLAT = [
+  { name: "淘宝", url: "https://s.taobao.com/search?q=" },
+  { name: "京东", url: "https://search.jd.com/Search?keyword=" },
+  { name: "拼多多", url: "https://mobile.yangkeduo.com/search_result.html?search_key=" },
+  { name: "小红书", url: "https://www.xiaohongshu.com/search_result?keyword=" },
+  { name: "抖音", url: "https://www.douyin.com/search/" }
+];
+const API = {
+  getPrices: function (item) { return item.prices || null; }
+};
+const ITEMS = [
+  { name: "免烫长袖衬衫", cat: "衬衫", who: "A", ref: "¥199–219", note: "常规版、肩线合肩，免烫好打理。", prices: { "淘宝": 199, "京东": 219 } },
+  { name: "直筒西裤", cat: "西裤", who: "A", ref: "待填写", note: "直筒、裤线清晰，裤脚落在鞋面。" },
+  { name: "藏青单西", cat: "单西", who: "A", ref: "待填写", note: "单排扣、平驳领，肩线合肩，先买藏青。" },
+  { name: "小码短款垂坠衬衫", cat: "衬衫", who: "B", ref: "待填写", note: "小码短款、垂坠面料，衣长到腰带附近。" },
+  { name: "高腰直筒九分裤", cat: "西裤", who: "B", ref: "待填写", note: "高腰直筒九分，裤脚不堆叠。" },
+  { name: "肩线清晰短款西装", cat: "西装", who: "B", ref: "待填写", note: "肩线清晰短款，不要长款压身高。" },
+  { name: "纯色圆领 T 恤", cat: "T 恤", who: "共用", ref: "待填写", note: "纯色、无大印花，常规版。" },
+  { name: "深色直筒牛仔裤", cat: "牛仔裤", who: "共用", ref: "待填写", note: "深色直筒，不要破洞、不要阔腿。" },
+  { name: "白色简约板鞋", cat: "板鞋", who: "共用", ref: "待填写", note: "纯色、鞋面干净，能配西裤和休闲裤。" }
+];
+const WHO_LABEL = { "A": "A（180cm 男生）", "B": "B（157cm 女生）", "共用": "共用" };
+const HUES = [
+  "linear-gradient(135deg,#d9c7c2,#e8ded8)", "linear-gradient(135deg,#c2cdd9,#dde3e8)",
+  "linear-gradient(135deg,#b9c4b4,#dde2d5)", "linear-gradient(135deg,#d9cbb4,#ece4d2)",
+  "linear-gradient(135deg,#c9b8c9,#e6dde6)", "linear-gradient(135deg,#b4c2c0,#d8e0de)",
+  "linear-gradient(135deg,#d2d2c4,#e8e8dd)", "linear-gradient(135deg,#c4b8a8,#e3dcd2)",
+  "linear-gradient(135deg,#c2c2d1,#e0e0e8)"
+];
+function esc(s) {
+  return String(s == null ? "" : s)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+function lowestPrice(prices) {
+  var best = null;
+  Object.keys(prices || {}).forEach(function (k) {
+    var v = Number(prices[k]);
+    if (Number.isFinite(v) && v > 0 && (!best || v < best.price)) best = { platform: k, price: v };
+  });
+  return best;
+}
+function renderWish(filter) {
+  var grid = document.getElementById("wishGrid");
+  var list = ITEMS.filter(function (it, i) { return filter === "全部" || it.who === filter; });
+  grid.innerHTML = list.map(function (it) {
+    var idx = ITEMS.indexOf(it);
+    var prices = API.getPrices(it);
+    var low = lowestPrice(prices);
+    var priceHtml = "";
+    if (prices) {
+      var rows = Object.keys(prices).map(function (k) {
+        var isLow = low && k === low.platform && Number(prices[k]) === low.price;
+        return "<span" + (isLow ? ' class="low"' : "") + ">" + esc(k) + " ¥" + esc(prices[k]) + (isLow ? "（最低价）" : "") + "</span>";
+      }).join(" · ");
+      priceHtml = '<p class="wish-price">' + rows + "</p>";
+    }
+    var btns = PLAT.map(function (p) {
+      return '<a href="' + p.url + encodeURIComponent(it.name) + '" target="_blank" rel="noopener noreferrer">' + esc(p.name) + " ↗</a>";
+    }).join("");
+    return '<article class="wish-card"><div class="wish-thumb" style="background:' + HUES[idx % HUES.length] + '"></div>' +
+      "<h3>" + esc(it.name) + "</h3>" +
+      "<p>" + esc(it.cat) + " · " + esc(WHO_LABEL[it.who] || it.who) + "</p>" +
+      "<p>参考价：" + esc(it.ref) + "</p>" + priceHtml +
+      "<p>" + esc(it.note) + "</p>" +
+      '<div class="wish-btns">' + btns + "</div></article>";
+  }).join("");
+}
+document.querySelectorAll("#wishFilters button").forEach(function (btn) {
+  btn.addEventListener("click", function () {
+    document.querySelectorAll("#wishFilters button").forEach(function (b) { b.classList.toggle("active", b === btn); });
+    renderWish(btn.getAttribute("data-who"));
+  });
+});
+renderWish("全部");
+(function () {
+  var sec = document.getElementById("wishlist");
+  if (!sec || !("IntersectionObserver" in window)) return;
+  sec.classList.add("wish-reveal");
+  var ob = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { sec.classList.add("in"); ob.disconnect(); }
+    });
+  });
+  ob.observe(sec);
+})();
+const PRESET_INSPO = [
+  { url: "https://girlstyle.com/my/article/213478/%E5%B0%8F%E4%B8%AA%E5%AD%90-%E8%85%BF%E7%9F%AD-%E5%A5%B3%E7%94%9F-%E7%A9%BF%E6%90%AD-%E6%90%AD%E9%85%8D-%E5%85%AC%E5%BC%8F-%E6%98%BE%E9%AB%98%E6%98%BE%E7%98%A6", label: "参考图文：上短下长" },
+  { url: "https://girlstyle.com/my/article/187730/%E5%B0%8F%E4%B8%AA%E5%AD%90-%E7%A9%BF%E6%90%AD%E6%B3%95%E5%88%99-%E6%98%BE%E9%AB%98-%E6%97%B6%E5%B0%9A-%E6%90%AD%E9%85%8D", label: "参考图文：小个子显高法则" },
+  { url: "https://girlstyle.com/my/article/232327/%E8%81%8C%E5%9C%BA-%E9%80%9A%E5%8B%A4-%E7%A9%BF%E6%90%AD-%E4%B8%8A%E7%8F%AD%E6%97%8F", label: "参考图文：通勤穿搭公式" },
+  { url: "https://post.smzdm.com/p/apqmmnqx/", label: "参考图文：上松下直避雷" }
+];
+const INSPO_KEY = "xinyuan-inspo";
+function readInspo() {
+  try { return JSON.parse(localStorage.getItem(INSPO_KEY)) || []; } catch (e) { return []; }
+}
+function writeInspo(list) {
+  try { localStorage.setItem(INSPO_KEY, JSON.stringify(list)); } catch (e) {}
+}
+function renderInspo() {
+  var box = document.getElementById("inspoList");
+  var user = readInspo();
+  var presetHtml = PRESET_INSPO.map(function (it) {
+    return '<div class="inspo-card"><p><a href="' + esc(it.url) + '" target="_blank" rel="noopener noreferrer">' + esc(it.label) + " ↗</a></p></div>";
+  }).join("");
+  var userHtml = user.map(function (it, i) {
+    var tags = (it.tags || []).map(function (t) { return '<span class="chip">' + esc(t) + "</span>"; }).join(" ");
+    return '<div class="inspo-card"><p><a href="' + esc(it.url) + '" target="_blank" rel="noopener noreferrer">打开原帖 ↗</a></p>' +
+      "<p>" + tags + "</p><p>" + esc(it.note) + "</p>" +
+      '<button class="inspo-del" type="button" data-del="' + i + '">删除</button></div>';
+  }).join("");
+  box.innerHTML = presetHtml + userHtml;
+}
+document.getElementById("inspoList").addEventListener("click", function (e) {
+  var btn = e.target.closest("[data-del]");
+  if (!btn) return;
+  var list = readInspo();
+  list.splice(Number(btn.getAttribute("data-del")), 1);
+  writeInspo(list);
+  renderInspo();
+});
+document.getElementById("inspoForm").addEventListener("submit", function (e) {
+  e.preventDefault();
+  var url = document.getElementById("inspoUrl").value.trim();
+  if (!/^https?:\/\//.test(url)) { alert("链接须以 http:// 或 https:// 开头"); return; }
+  var tags = document.getElementById("inspoTags").value.split(/[,，]/).map(function (s) { return s.trim(); }).filter(Boolean);
+  var list = readInspo();
+  list.push({ url: url, tags: tags, note: document.getElementById("inspoNote").value.trim() });
+  writeInspo(list);
+  e.target.reset();
+  renderInspo();
+});
+renderInspo();
+</script>
 </body>
 </html>
